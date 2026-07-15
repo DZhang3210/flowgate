@@ -1,0 +1,8 @@
+curl -X POST localhost:3000/tenants -H "Content-Type: application/json" -d '{"name": "Test Corp", "email": "test@example.com", "plan": "free"}'                                     
+{"id":"7120d3d2-3279-435a-b3e8-bf54ed3974e9","name":"Test Corp","email":"test@example.com","plan":"free","webhook_url":null,"created_at":"2026-06-10T22:50:14.943Z"}
+
+curl -X POST localhost:3000/tenants/7120d3d2-3279-435a-b3e8-bf54ed3974e9/keys -H "Content-Type: application/json" -d '{"label": "my first key"}'
+{"id":"d34e99db-de6d-44ff-ad7a-7f39d025c72c","tenant_id":"7120d3d2-3279-435a-b3e8-bf54ed3974e9","key_prefix":"fg_59ac4ed","label":"my first key","created_at":"2026-06-10T22:56:36.357Z","key":"fg_59ac4edccec471facd3f3ec488ce852c"}
+
+curl localhost:3000/api/data -H "Authorization: Bearer fg_59ac4edccec471facd3f3ec488ce852c"
+{"requestId":"ec606ff7-d763-4943-bfe2-da45aed96180","tenantId":"7120d3d2-3279-435a-b3e8-bf54ed3974e9","data":[{"id":1,"value":"alpha","score":0.91},{"id":2,"value":"beta","score":0.87},{"id":3,"value":"gamma","score":0.74},{"id":4,"value":"delta","score":0.65},{"id":5,"value":"epsilon","score":0.58}],"rateLimit":{"limit":60,"remaining":59,"resetAt":"2026-06-10T22:58:00.000Z"},"timestamp":"2026-06-10T22:57:15.518Z"}
