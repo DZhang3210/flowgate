@@ -35,9 +35,9 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
     }
 
     condition {
-      test     = "StringEquals"
+      test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:DZhang3210@53838139/flowgate@1302073667:ref:refs/heads/main"]
+      values   = ["repo:DZhang3210@53838139/flowgate@1302073667:*"]
     }
   }
 }
