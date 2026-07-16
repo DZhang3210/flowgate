@@ -38,6 +38,7 @@ module "compute" {
   secret_manager_arn = module.security.aws_sm_arn
   sqs_queue_url = module.queue.sqs_queue_url
   sqs_queue_name = module.queue.sqs_queue_name
+  image_tag = var.image_tag
 }
 
 module "database" {
@@ -84,4 +85,14 @@ module "idle-scheduler" {
   api_desired_count = module.compute.ecs_api_desired_count
   worker_desired_count = module.compute.ecs_worker_desired_count 
   sns_topic_arn = module.observability.sns_arn
+}
+
+module "cicd" {
+  source = "./modules/cicd"
+  app_name = var.app_name
+  environment = var.environment
+  api_ecr_arn = module.compute.api_ecr_arn
+  worker_ecr_arn = module.compute.worker_ecr_arn
+  api_ecs_arn = module.compute.api_ecs_arn
+  worker_ecs_arn = module.compute.worker_ecs_arn
 }

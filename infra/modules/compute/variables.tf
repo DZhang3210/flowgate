@@ -137,3 +137,8 @@ variable "sqs_queue_name"{
     description = "name for sqs queue"
     type = string
 }
+
+variable "image_tag" {
+  description = "image tag"
+  default = "latest"
+}

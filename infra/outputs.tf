@@ -24,3 +24,7 @@ output "worker_desired_count" {
   value = module.compute.ecs_worker_desired_count
 }
 
+output "github_actions_iam_role_arn" {
+  value = module.cicd.github_actions_iam_role_arn
+}
+

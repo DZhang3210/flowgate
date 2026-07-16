@@ -36,3 +36,9 @@ variable "alert_email" {
   default = "alert_email"
   sensitive = true
 }
+
+variable "image_tag" {
+    description = "image tag"
+    type = string
+    default = "latest"
+}

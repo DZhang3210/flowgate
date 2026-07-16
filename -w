@@ -1,1 +1,3 @@
 {"error":"Rate limit exceeded","limit":60,"remaining":0,"resetAt":"2026-06-26T02:35:00.000Z"}
+
+arn:aws:iam::276730431500:role/flowgate-staging-github-actions

@@ -1,0 +1,113 @@
+name: Deploy FlowGate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get AWS ECR Token
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::276730431500:role/flowgate-staging-github-actions
+          aws-region: us-east-1
+
+      - name: Log in to Amazon ECR
+        run: |
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 276730431500.dkr.ecr.us-east-1.amazonaws.com
+
+      - name: Build image
+        run: |
+          docker build -t flowgate:${{ github.sha }} .
+
+      - name: Tag and push images
+        run: |
+          docker tag flowgate:${{ github.sha }} 276730431500.dkr.ecr.us-east-1.amazonaws.com/flowgate-api:${{ github.sha }}
+          docker tag flowgate:${{ github.sha }} 276730431500.dkr.ecr.us-east-1.amazonaws.com/flowgate-worker:${{ github.sha }}
+          docker push 276730431500.dkr.ecr.us-east-1.amazonaws.com/flowgate-api:${{ github.sha }}
+          docker push 276730431500.dkr.ecr.us-east-1.amazonaws.com/flowgate-worker:${{ github.sha }}
+
+      - name: Run tfsec
+        uses: aquasecurity/tfsec-action@v1.0.0
+        with:
+          working_directory: infra
+          tfsec_args: --minimum-severity HIGH
+
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: infra
+          soft_fail: false
+      - name: Setup Infracost
+        if: github.event_name == 'pull_request'
+        uses: infracost/actions/setup@v3
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+
+      - name: Checkout base branch
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          path: base
+
+      - name: Generate baseline cost estimate
+        if: github.event_name == 'pull_request'
+        run: |
+          infracost breakdown --path=base/infra --format=json --out-file=/tmp/infracost-base.json
+
+      - name: Checkout PR branch
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v4
+
+      - name: Generate cost diff
+        if: github.event_name == 'pull_request'
+        run: |
+          infracost diff --path=infra --format=json --compare-to=/tmp/infracost-base.json --out-file=/tmp/infracost.json
+
+      - name: Post cost diff as PR comment
+        if: github.event_name == 'pull_request'
+        uses: infracost/actions/comment@v3
+        with:
+          path: /tmp/infracost.json
+          behavior: update
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.0
+
+      - name: Terraform Init
+        working-directory: infra
+        run: terraform init
+    
+      - name: Terraform Plan
+        working-directory: infra
+        run: terraform plan -var="image_tag=${{ github.sha }}"
+
+      - name: Terraform Apply
+        if: github.event_name == 'push'
+        working-directory: infra
+        run: terraform apply -auto-approve -var="image_tag=${{ github.sha }}"
+
+      - name: Force New ecs Deployment
+        if: github.event_name == 'push'
+        run: |
+            aws ecs update-service --cluster flowgate-staging --service flowgate-api --force-new-deployment
+            aws ecs update-service --cluster flowgate-staging --service flowgate-worker --force-new-deployment
+
+      - name: Wait for ECS services to stabilize
+        if: github.event_name == 'push'
+        run: |
+          aws ecs wait services-stable --cluster flowgate-staging --services flowgate-api flowgate-worker

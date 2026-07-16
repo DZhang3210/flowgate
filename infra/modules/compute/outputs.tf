@@ -47,3 +47,23 @@ output "ecs_worker_desired_count" {
   description = "ecs worker desired count"
   value = var.worker_desired_count
 }
+
+output "api_ecr_arn" {
+  description = "api ecr arn"
+  value = aws_ecr_repository.api.arn
+}
+
+output "worker_ecr_arn" {
+  description = "worker ecr arn"
+  value = aws_ecr_repository.worker.arn
+}
+
+output "api_ecs_arn" {
+  description = "api ecs arn"
+  value = aws_ecs_service.api.id
+}
+
+output "worker_ecs_arn" {
+  description = "worker ecs arn"
+  value = aws_ecs_service.worker.id
+}

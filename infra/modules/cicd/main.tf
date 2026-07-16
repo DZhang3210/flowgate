@@ -1,8 +1,18 @@
+data "tls_certificate" "github_actions" {
+  url = "https://token.actions.githubusercontent.com"
+}
+
 resource "aws_iam_openid_connect_provider" "github" {
   url             = "https://token.actions.githubusercontent.com"
   client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea"]
+  thumbprint_list = [data.tls_certificate.github_actions.certificates[0].sha1_fingerprint]
 }
+
+resource "aws_iam_role" "github_actions" {
+  name               = "${var.app_name}-${var.environment}-github-actions"
+  assume_role_policy = data.aws_iam_policy_document.github_actions_assume_role.json
+}
+
 
 data "aws_iam_policy_document" "github_actions_assume_role" {
   statement {
@@ -27,3 +37,29 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
     }
   }
 }
+
+resource "aws_iam_role_policy" "github_actions" {
+  name = "${var.app_name}-${var.environment}-github-actions"
+  role = aws_iam_role.github_actions.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["ecr:GetAuthorizationToken", "ecs:DescribeServices"]
+        Resource = "*"
+      },
+       {
+        Effect   = "Allow"
+        Action   = ["ecr:BatchCheckLayerAvailability","ecr:InitiateLayerUpload", "ecr:UploadLayerPart", "ecr:CompleteLayerUpload", "ecr:PutImage"]
+        Resource = [var.api_ecr_arn, var.worker_ecr_arn]
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["ecs:UpdateService"]
+        Resource = [var.api_ecs_arn, var.worker_ecs_arn]
+      }
+    ]})
+}
+

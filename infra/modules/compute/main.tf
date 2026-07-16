@@ -25,7 +25,7 @@ resource "aws_ecs_task_definition" "api" {
   container_definitions = jsonencode([
     {
         name = "${var.app_name}-api"
-        image = "${aws_ecr_repository.api.repository_url}:latest"
+        image = "${aws_ecr_repository.api.repository_url}:${var.image_tag}"
         essential = true
         
         portMappings = [{
@@ -77,7 +77,7 @@ resource "aws_ecs_task_definition" "worker" {
   container_definitions = jsonencode([
     {
         name = "${var.app_name}-worker"
-        image = "${aws_ecr_repository.worker.repository_url}:latest"
+        image = "${aws_ecr_repository.worker.repository_url}:${var.image_tag}"
         essential = true
         command = ["node", "src/worker.js"]
 

@@ -10,6 +10,7 @@ const router = Router();
  * and Redis are reachable. Returns 503 otherwise so the ALB can
  * remove unhealthy tasks from the target group.
  */
+ // Insignificant Change
 router.get('/health', async (req, res) => {
   const checks = { postgres: false, redis: false };
 
