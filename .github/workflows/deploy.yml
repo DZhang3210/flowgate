@@ -78,10 +78,12 @@ jobs:
 
       - name: Post cost diff as PR comment
         if: github.event_name == 'pull_request'
-        uses: infracost/actions/comment@v3
-        with:
-          path: /tmp/infracost.json
-          behavior: update
+        run: |
+          infracost comment github --path=/tmp/infracost.json \
+            --repo=$GITHUB_REPOSITORY \
+            --github-token=${{ github.token }} \
+            --pull-request=${{ github.event.pull_request.number }} \
+            --behavior=update
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
