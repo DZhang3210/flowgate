@@ -94,7 +94,7 @@ variable "certificate_arn" {
 variable "api_desired_count" {
     description = "number of desire ecs api instances"
     type = number
-    default = 1
+    default = 2
 }
 
 variable "worker_desired_count" {
