@@ -3,3 +3,4 @@ node_modules/
 *.log
 infra/terraform.tfvars
 infra/.terraform
+tests/load/.env.local
