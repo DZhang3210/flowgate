@@ -115,6 +115,7 @@ resource "aws_cloudwatch_metric_alarm" "alb_no_requests_for_1_hour" {
     threshold           = 0
     treat_missing_data = "breaching"
     evaluation_periods  = 10
+    datapoints_to_alarm = 7
     period              = 6 * 60
     statistic           = "Sum"
     metric_name         = "RequestCount"
