@@ -96,3 +96,12 @@ module "cicd" {
   api_ecs_arn = module.compute.api_ecs_arn
   worker_ecs_arn = module.compute.worker_ecs_arn
 }
+
+module "chaos" {
+  source = "./modules/chaos"
+  app_name = var.app_name
+  environment = var.environment
+  fis_role_arn = module.security.fis_iam_arn
+  ecs_cluster_name = module.compute.ecs_cluster_name
+  ecs_api_service_name = module.compute.ecs_api_service_name
+}

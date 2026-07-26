@@ -284,3 +284,36 @@ resource "aws_secretsmanager_secret_version" "db_credentials" {
     ignore_changes = [secret_string]
   }
 }
+
+resource "aws_iam_role" "fis" {
+  name               = "${var.app_name}-${var.environment}-fis"
+  assume_role_policy = data.aws_iam_policy_document.fis_assume_role.json
+}
+
+data "aws_iam_policy_document" "fis_assume_role" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["fis.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role_policy" "fis" {
+  name = "${var.app_name}-${var.environment}-fis"
+  role = aws_iam_role.fis.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["ecs:DescribeTasks", "ecs:ListTasks", "ecs:StopTask", "tag:GetResources"]
+        Resource = "*"
+      }
+    ]
+  })
+}

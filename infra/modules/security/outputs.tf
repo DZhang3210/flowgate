@@ -53,3 +53,7 @@ output "aws_sm_arn" {
     value = aws_secretsmanager_secret.db_credentials.arn
 }
 
+output "fis_iam_arn" {
+    description = "IAM role for fis"
+    value = aws_iam_role.fis.arn
+}
