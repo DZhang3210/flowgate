@@ -22,3 +22,13 @@ variable "ecs_api_service_name" {
   description = "ecs api service name"
   type        = string
 }
+
+variable "vpc_id" {
+  description = "VPC ID, used for subnet-based FIS targets"
+  type        = string
+}
+
+variable "alb_5xx_alarm_arn" {
+  description = "ALB 5xx alarm ARN, used as FIS stop condition for duration-based experiments"
+  type        = string
+}

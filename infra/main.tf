@@ -104,4 +104,6 @@ module "chaos" {
   fis_role_arn = module.security.fis_iam_arn
   ecs_cluster_name = module.compute.ecs_cluster_name
   ecs_api_service_name = module.compute.ecs_api_service_name
+  vpc_id = module.networking.vpc_id
+  alb_5xx_alarm_arn = module.observability.alb_5xx_alarm_arn
 }

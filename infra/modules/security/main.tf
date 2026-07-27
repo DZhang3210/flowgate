@@ -313,6 +313,22 @@ resource "aws_iam_role_policy" "fis" {
         Effect   = "Allow"
         Action   = ["ecs:DescribeTasks", "ecs:ListTasks", "ecs:StopTask", "tag:GetResources"]
         Resource = "*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = [
+          "ec2:CreateNetworkAcl",
+          "ec2:CreateNetworkAclEntry",
+          "ec2:CreateTags",
+          "ec2:DeleteNetworkAcl",
+          "ec2:DescribeManagedPrefixLists",
+          "ec2:DescribeNetworkAcls",
+          "ec2:DescribeSubnets",
+          "ec2:DescribeVpcs",
+          "ec2:GetManagedPrefixListEntries",
+          "ec2:ReplaceNetworkAclAssociation"
+        ]
+        Resource = "*"
       }
     ]
   })

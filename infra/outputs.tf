@@ -35,3 +35,11 @@ output "kill_one_api_task_id" {
 output "kill_all_api_tasks_id" {
   value = module.chaos.kill_all_api_tasks_id
 }
+
+output "disrupt_az_a_id" {
+  value = module.chaos.disrupt_az_a_id
+}
+
+output "disrupt_az_b_id" {
+  value = module.chaos.disrupt_az_b_id
+}

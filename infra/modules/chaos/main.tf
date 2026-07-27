@@ -65,3 +65,93 @@ resource "aws_fis_experiment_template" "kill_all_api_tasks" {
     Name = "${var.app_name}-${var.environment}-kill-all-api-tasks"
   }
 }
+
+resource "aws_fis_experiment_template" "disrupt_az_a" {
+  description = "Experiment D: disrupt AZ-a (us-east-1a), expect ECS self-heals via surviving AZ"
+  role_arn    = var.fis_role_arn
+
+  stop_condition {
+    source = "aws:cloudwatch:alarm"
+    value  = var.alb_5xx_alarm_arn
+  }
+
+  target {
+    name           = "az_a_subnets"
+    resource_type  = "aws:ec2:subnet"
+    selection_mode = "ALL"
+
+    parameters = {
+      availabilityZoneIdentifier = "us-east-1a"
+      vpc                        = var.vpc_id
+    }
+  }
+
+  action {
+    name      = "disrupt_az_a_connectivity"
+    action_id = "aws:network:disrupt-connectivity"
+
+    parameter {
+      key   = "scope"
+      value = "all"
+    }
+
+    parameter {
+      key   = "duration"
+      value = "PT5M"
+    }
+
+    target {
+      key   = "Subnets"
+      value = "az_a_subnets"
+    }
+  }
+
+  tags = {
+    Name = "${var.app_name}-${var.environment}-disrupt-az-a"
+  }
+}
+
+resource "aws_fis_experiment_template" "disrupt_az_b" {
+  description = "Experiment D: disrupt AZ-b (us-east-1b), expect RDS + Redis unreachable with no auto-recovery"
+  role_arn    = var.fis_role_arn
+
+  stop_condition {
+    source = "aws:cloudwatch:alarm"
+    value  = var.alb_5xx_alarm_arn
+  }
+
+  target {
+    name           = "az_b_subnets"
+    resource_type  = "aws:ec2:subnet"
+    selection_mode = "ALL"
+
+    parameters = {
+      availabilityZoneIdentifier = "us-east-1b"
+      vpc                        = var.vpc_id
+    }
+  }
+
+  action {
+    name      = "disrupt_az_b_connectivity"
+    action_id = "aws:network:disrupt-connectivity"
+
+    parameter {
+      key   = "scope"
+      value = "all"
+    }
+
+    parameter {
+      key   = "duration"
+      value = "PT5M"
+    }
+
+    target {
+      key   = "Subnets"
+      value = "az_b_subnets"
+    }
+  }
+
+  tags = {
+    Name = "${var.app_name}-${var.environment}-disrupt-az-b"
+  }
+}

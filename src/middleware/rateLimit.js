@@ -35,6 +35,7 @@ async function rateLimit(req, res, next) {
       tenantId: tenant.id,
       error: err.message,
     }));
+    req.rateLimitInfo = { limit, current: null, remaining: limit, windowEndsAt: (window + 1) * 60 * 1000 };
     return next();
   }
 
